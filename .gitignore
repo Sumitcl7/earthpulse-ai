@@ -34,3 +34,6 @@ ndvi_*.py
 
 # Logs
 *.log
+
+*.mp4
+earthpulse-ui/public/*.mp4

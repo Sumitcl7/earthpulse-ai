@@ -1,0 +1,23 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+venv/
+*.db
+
+# Node
+node_modules/
+dist/
+
+# Environment
+.env
+*.json
+
+# IDE
+.vscode/
+.idea/
+
+# Large media files
+hero.mp4
+ndvi_preview.png
+*.mp4
+*.png

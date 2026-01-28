@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_a29fcea676b9f092b7e3034c206a43f2 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.1.0/leaflet.markercluster.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.1.0/MarkerCluster.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.1.0/MarkerCluster.Default.css"/>
+</head>
+<body>
+    
+    
+<div style="
+    position: fixed;
+    bottom: 40px; right: 20px;
+    z-index: 9999;
+    background-color: white;
+    padding: 10px 15px;
+    border: 2px solid #444;
+    border-radius: 8px;
+    font-size: 13px;
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+">
+<b>🌱 Event Legend</b><br>
+<i class="fa fa-map-marker" style="color:red"></i> Wildfire<br>
+<i class="fa fa-map-marker" style="color:blue"></i> Flood<br>
+<i class="fa fa-map-marker" style="color:green"></i> Deforestation<br>
+<i class="fa fa-map-marker" style="color:purple"></i> Storm<br>
+<i class="fa fa-map-marker" style="color:orange"></i> Earthquake<br>
+<i class="fa fa-map-marker" style="color:gray"></i> Other/Unknown
+</div>
+    
+            <div class="folium-map" id="map_a29fcea676b9f092b7e3034c206a43f2" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_a29fcea676b9f092b7e3034c206a43f2 = L.map(
+                "map_a29fcea676b9f092b7e3034c206a43f2",
+                {
+                    center: [20.0, 0.0],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 2,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_95ce46c6077af2759cf49c71cab65b6a = L.tileLayer(
+                "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 20,
+  "maxNativeZoom": 20,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors \u0026copy; \u003ca href=\"https://carto.com/attributions\"\u003eCARTO\u003c/a\u003e",
+  "subdomains": "abcd",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_95ce46c6077af2759cf49c71cab65b6a.addTo(map_a29fcea676b9f092b7e3034c206a43f2);
+        
+    
+            var marker_cluster_6e4b290e023a3f8aacf341122b5a8bce = L.markerClusterGroup(
+                {
+}
+            );
+        
+    
+            var marker_67abf1c4e71e71ae7dbfac9e338e9fb6 = L.marker(
+                [-26.7018986, 15.2318461],
+                {
+}
+            ).addTo(marker_cluster_6e4b290e023a3f8aacf341122b5a8bce);
+        
+    
+            var icon_d5e24bf855e69079b8a2b27f065bae9e = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "globe",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_e9bdd8bc5c0700e3e493d8c36106f101 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_a12f70389511375e0fe8ca9e28165742 = $(`<div id="html_a12f70389511375e0fe8ca9e28165742" style="width: 100.0%; height: 100.0%;">     <div style='font-size:13px; width:280px'>         <b>Pictured: Winning entries for Wildlife Photographer of the Year 2025</b><br>         <b>Event:</b> Flood<br><br>         <img src="https://earthengine.googleapis.com/v1/projects/earthpulse-472111/thumbnails/9e87d1e09ed1203a9f94698f6c98f024-889974dd714725a8d31f42ede2f05700:getPixels" width="260"><br><br>         <a href="https://www.bbc.com/news/articles/cx253vrd931o" target="_blank">🔗 Read full article</a>     </div>     </div>`)[0];
+                popup_e9bdd8bc5c0700e3e493d8c36106f101.setContent(html_a12f70389511375e0fe8ca9e28165742);
+            
+        
+
+        marker_67abf1c4e71e71ae7dbfac9e338e9fb6.bindPopup(popup_e9bdd8bc5c0700e3e493d8c36106f101)
+        ;
+
+        
+    
+    
+                marker_67abf1c4e71e71ae7dbfac9e338e9fb6.setIcon(icon_d5e24bf855e69079b8a2b27f065bae9e);
+            
+    
+            var marker_3fb45a3f42e3169962d05e7c6d547be1 = L.marker(
+                [30.8124247, 34.8594762],
+                {
+}
+            ).addTo(marker_cluster_6e4b290e023a3f8aacf341122b5a8bce);
+        
+    
+            var icon_17c7239fb8c8a7a14991ad285b342e3b = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "red",
+  "iconColor": "white",
+  "icon": "globe",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_357252376a6939a447b92a28faf129c5 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_d81b987430dae893a1ffe1190ce6daac = $(`<div id="html_d81b987430dae893a1ffe1190ce6daac" style="width: 100.0%; height: 100.0%;">     <div style='font-size:13px; width:280px'>         <b>Latest News & Updates</b><br>         <b>Event:</b> Wildfire<br><br>         <img src="https://earthengine.googleapis.com/v1/projects/earthpulse-472111/thumbnails/facf77b3b8493d28edc61ae767288c45-4ab05518f206c5d42094c11bf8b69ac4:getPixels" width="260"><br><br>         <a href="https://www.bbc.com/news/topics/c2vdnvdg6xxt" target="_blank">🔗 Read full article</a>     </div>     </div>`)[0];
+                popup_357252376a6939a447b92a28faf129c5.setContent(html_d81b987430dae893a1ffe1190ce6daac);
+            
+        
+
+        marker_3fb45a3f42e3169962d05e7c6d547be1.bindPopup(popup_357252376a6939a447b92a28faf129c5)
+        ;
+
+        
+    
+    
+                marker_3fb45a3f42e3169962d05e7c6d547be1.setIcon(icon_17c7239fb8c8a7a14991ad285b342e3b);
+            
+    
+            var marker_9f744c5747d1ea6bb62c783c846a4097 = L.marker(
+                [53.7974185, -1.5437941],
+                {
+}
+            ).addTo(marker_cluster_6e4b290e023a3f8aacf341122b5a8bce);
+        
+    
+            var icon_e705bb23cbcd64a9709e3b9ce660eabc = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "gray",
+  "iconColor": "white",
+  "icon": "globe",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_40b09748c4a6df7f26d920ecbed9c99f = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_603bc65e92e116347350658d355147a9 = $(`<div id="html_603bc65e92e116347350658d355147a9" style="width: 100.0%; height: 100.0%;">     <div style='font-size:13px; width:280px'>         <b>Latest News & Updates</b><br>         <b>Event:</b> Unknown<br><br>         <img src="https://earthengine.googleapis.com/v1/projects/earthpulse-472111/thumbnails/63c9fa48fcc06eeec4cf4fd2ca041a69-b37f18b62e79fd70349e2ae44d89cc5e:getPixels" width="260"><br><br>         <a href="https://www.bbc.com/news/england" target="_blank">🔗 Read full article</a>     </div>     </div>`)[0];
+                popup_40b09748c4a6df7f26d920ecbed9c99f.setContent(html_603bc65e92e116347350658d355147a9);
+            
+        
+
+        marker_9f744c5747d1ea6bb62c783c846a4097.bindPopup(popup_40b09748c4a6df7f26d920ecbed9c99f)
+        ;
+
+        
+    
+    
+                marker_9f744c5747d1ea6bb62c783c846a4097.setIcon(icon_e705bb23cbcd64a9709e3b9ce660eabc);
+            
+    
+            var marker_cd31876a58dc492cfe59a4947d1ad890 = L.marker(
+                [34.2331373, -102.4107493],
+                {
+}
+            ).addTo(marker_cluster_6e4b290e023a3f8aacf341122b5a8bce);
+        
+    
+            var icon_000675cb6e8c621522b78172d075fc88 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "gray",
+  "iconColor": "white",
+  "icon": "globe",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_25728f24f2a3462c0769fd1858d653af = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_5af7aaaf0341ffb663403b7423332a38 = $(`<div id="html_5af7aaaf0341ffb663403b7423332a38" style="width: 100.0%; height: 100.0%;">     <div style='font-size:13px; width:280px'>         <b>Nasa Apollo missions: Stories of the last Moon men</b><br>         <b>Event:</b> Unknown<br><br>         <img src="https://earthengine.googleapis.com/v1/projects/earthpulse-472111/thumbnails/80670e8f3f28dcf45d2d5c0ed893bf97-e1fb6af5e159bacf872268e2b70871ad:getPixels" width="260"><br><br>         <a href="https://www.bbc.com/news/articles/c4g9yde95yyo" target="_blank">🔗 Read full article</a>     </div>     </div>`)[0];
+                popup_25728f24f2a3462c0769fd1858d653af.setContent(html_5af7aaaf0341ffb663403b7423332a38);
+            
+        
+
+        marker_cd31876a58dc492cfe59a4947d1ad890.bindPopup(popup_25728f24f2a3462c0769fd1858d653af)
+        ;
+
+        
+    
+    
+                marker_cd31876a58dc492cfe59a4947d1ad890.setIcon(icon_000675cb6e8c621522b78172d075fc88);
+            
+    
+            var marker_8a3f75b719bf8d75239fd94acc92b0a6 = L.marker(
+                [27.3513186, -81.3615717],
+                {
+}
+            ).addTo(marker_cluster_6e4b290e023a3f8aacf341122b5a8bce);
+        
+    
+            var icon_a75f0fe6ee12b7c9d35b67d62d753c01 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "gray",
+  "iconColor": "white",
+  "icon": "globe",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_c5b3681ce5e928f24a70a6b201a76453 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_2c6feb5ab1774c32ac951a8eb3812e9a = $(`<div id="html_2c6feb5ab1774c32ac951a8eb3812e9a" style="width: 100.0%; height: 100.0%;">     <div style='font-size:13px; width:280px'>         <b>Week in wildlife: a ferocious wildcat, a cheeky seal and a disgruntled lioness</b><br>         <b>Event:</b> Unknown<br><br>         <img src="https://earthengine.googleapis.com/v1/projects/earthpulse-472111/thumbnails/1e3e0f788020e7a86b35b354d2109396-fa686334d0d2d8e1ce83e56b04a15b31:getPixels" width="260"><br><br>         <a href="https://www.theguardian.com/environment/gallery/2025/oct/24/week-in-wildlife-a-ferocious-wildcat-a-cheeky-seal-and-a-disgruntled-lioness" target="_blank">🔗 Read full article</a>     </div>     </div>`)[0];
+                popup_c5b3681ce5e928f24a70a6b201a76453.setContent(html_2c6feb5ab1774c32ac951a8eb3812e9a);
+            
+        
+
+        marker_8a3f75b719bf8d75239fd94acc92b0a6.bindPopup(popup_c5b3681ce5e928f24a70a6b201a76453)
+        ;
+
+        
+    
+    
+                marker_8a3f75b719bf8d75239fd94acc92b0a6.setIcon(icon_a75f0fe6ee12b7c9d35b67d62d753c01);
+            
+    
+            var marker_e1a3811be5751bf8294cacde2d818bc3 = L.marker(
+                [38.9040127, -77.0407249],
+                {
+}
+            ).addTo(marker_cluster_6e4b290e023a3f8aacf341122b5a8bce);
+        
+    
+            var icon_f4d3a1713c79f11ea6697927ab6207af = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "globe",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_b596315b71b6b77a0874afb6b7b1fb20 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_2d8804e7a381887021fef8efc2f03fc6 = $(`<div id="html_2d8804e7a381887021fef8efc2f03fc6" style="width: 100.0%; height: 100.0%;">     <div style='font-size:13px; width:280px'>         <b>Bonobos transformed how we think about animal societies. Can we save the last of the ‘hippy apes’?</b><br>         <b>Event:</b> Deforestation<br><br>         <img src="https://earthengine.googleapis.com/v1/projects/earthpulse-472111/thumbnails/8cd5559b24a891459056ad69ea1003aa-4083ac6814a21cacf0cd231201a0a3b2:getPixels" width="260"><br><br>         <a href="https://www.theguardian.com/environment/2025/oct/19/hippy-apes-hunt-bonobos-congo-river-aoe" target="_blank">🔗 Read full article</a>     </div>     </div>`)[0];
+                popup_b596315b71b6b77a0874afb6b7b1fb20.setContent(html_2d8804e7a381887021fef8efc2f03fc6);
+            
+        
+
+        marker_e1a3811be5751bf8294cacde2d818bc3.bindPopup(popup_b596315b71b6b77a0874afb6b7b1fb20)
+        ;
+
+        
+    
+    
+                marker_e1a3811be5751bf8294cacde2d818bc3.setIcon(icon_f4d3a1713c79f11ea6697927ab6207af);
+            
+    
+            var marker_364ea3e7d34dc2a823eb62c5fdff4da9 = L.marker(
+                [11.5024338, 17.7578122],
+                {
+}
+            ).addTo(marker_cluster_6e4b290e023a3f8aacf341122b5a8bce);
+        
+    
+            var icon_45ce9af6e422f5fe4b4786cd88d5d1a0 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "red",
+  "iconColor": "white",
+  "icon": "globe",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_ac01535b7bfd5e284da1d1866f46fc92 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_f64b2665bdffdbe724a4bb7510fcc0f4 = $(`<div id="html_f64b2665bdffdbe724a4bb7510fcc0f4" style="width: 100.0%; height: 100.0%;">     <div style='font-size:13px; width:280px'>         <b>Bird migration is changing. What does this reveal about our planet? – visualised</b><br>         <b>Event:</b> Wildfire<br><br>         <img src="https://earthengine.googleapis.com/v1/projects/earthpulse-472111/thumbnails/b1f614e915cc353bd0c9450e7b01ee50-6ad5d79c0dd2ef680f417485137e8db6:getPixels" width="260"><br><br>         <a href="https://www.theguardian.com/environment/ng-interactive/2025/oct/16/bird-migration-is-changing-what-does-this-reveal-about-our-planet-visualised-aoe" target="_blank">🔗 Read full article</a>     </div>     </div>`)[0];
+                popup_ac01535b7bfd5e284da1d1866f46fc92.setContent(html_f64b2665bdffdbe724a4bb7510fcc0f4);
+            
+        
+
+        marker_364ea3e7d34dc2a823eb62c5fdff4da9.bindPopup(popup_ac01535b7bfd5e284da1d1866f46fc92)
+        ;
+
+        
+    
+    
+                marker_364ea3e7d34dc2a823eb62c5fdff4da9.setIcon(icon_45ce9af6e422f5fe4b4786cd88d5d1a0);
+            
+    
+            var marker_2197898f39f6f4990e0a41958b74ba2c = L.marker(
+                [39.7837304, -100.445882],
+                {
+}
+            ).addTo(marker_cluster_6e4b290e023a3f8aacf341122b5a8bce);
+        
+    
+            var icon_2d24f9dd62b1bf04a433519d3a06d538 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "gray",
+  "iconColor": "white",
+  "icon": "globe",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_c5cd5377ffabbff5a53213923e8289ae = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_28eb5b122ab05c9a008daa02c9d9fd72 = $(`<div id="html_28eb5b122ab05c9a008daa02c9d9fd72" style="width: 100.0%; height: 100.0%;">     <div style='font-size:13px; width:280px'>         <b>The Guardian</b><br>         <b>Event:</b> Unknown<br><br>         <img src="https://earthengine.googleapis.com/v1/projects/earthpulse-472111/thumbnails/1237fdb4fa8f159e5037f028eaae45c6-5b46dd3964defbacb2387140bb4f8692:getPixels" width="260"><br><br>         <a href="https://www.theguardian.com/environment/all" target="_blank">🔗 Read full article</a>     </div>     </div>`)[0];
+                popup_c5cd5377ffabbff5a53213923e8289ae.setContent(html_28eb5b122ab05c9a008daa02c9d9fd72);
+            
+        
+
+        marker_2197898f39f6f4990e0a41958b74ba2c.bindPopup(popup_c5cd5377ffabbff5a53213923e8289ae)
+        ;
+
+        
+    
+    
+                marker_2197898f39f6f4990e0a41958b74ba2c.setIcon(icon_2d24f9dd62b1bf04a433519d3a06d538);
+            
+    
+            marker_cluster_6e4b290e023a3f8aacf341122b5a8bce.addTo(map_a29fcea676b9f092b7e3034c206a43f2);
+        
+</script>
+</html>

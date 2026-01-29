@@ -1,21 +1,21 @@
 import { useState } from 'react';
-import { getNDVI, NDVIResult } from '../services/api';
+import { getNDVI, type NDVIResult } from '../services/api';
 
-export const useSatelliteAnalysis = () => {
+export function useSatelliteAnalysis() {
   const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<NDVIResult | null>(null);
 
-  const analyzeNDVI = async (latitude: number, longitude: number): Promise<NDVIResult | null> => {
+  const analyze = async (latitude: number, longitude: number) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const result = await getNDVI(latitude, longitude);
-      return result;
-    } catch (err) {
-      console.error('Error analyzing NDVI:', err);
-      return null;
+      const data = await getNDVI(latitude, longitude);
+      setResult(data);
+    } catch (error) {
+      console.error('Error analyzing satellite data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  return { analyzeNDVI, loading };
-};
+  return { result, loading, analyze };
+}

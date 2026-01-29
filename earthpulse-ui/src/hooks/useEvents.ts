@@ -1,27 +1,24 @@
 import { useState, useEffect } from 'react';
-import { getEvents, Event } from '../services/api';
+import { getEvents, type Event } from '../services/api';
 
-export const useEvents = () => {
+export function useEvents() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        setLoading(true);
-        const data = await getEvents();
-        setEvents(data);
-      } catch (err: any) {
-        setError(err.message);
-        console.error('Error fetching events:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEvents();
+    loadEvents();
   }, []);
 
-  return { events, loading, error };
-};
+  const loadEvents = async () => {
+    try {
+      const data = await getEvents();
+      setEvents(data);
+    } catch (error) {
+      console.error('Error loading events:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { events, loading, refresh: loadEvents };
+}

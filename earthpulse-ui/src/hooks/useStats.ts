@@ -1,26 +1,24 @@
 import { useState, useEffect } from 'react';
-import { getStats, Stats } from '../services/api';
+import { getStats, type Stats } from '../services/api';
 
-export const useStats = () => {
+export function useStats() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const data = await getStats();
-        setStats(data);
-      } catch (err) {
-        console.error('Error fetching stats:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStats();
-    const interval = setInterval(fetchStats, 30000);
-    return () => clearInterval(interval);
+    loadStats();
   }, []);
 
-  return { stats, loading };
-};
+  const loadStats = async () => {
+    try {
+      const data = await getStats();
+      setStats(data);
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { stats, loading, refresh: loadStats };
+}

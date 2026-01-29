@@ -41,14 +41,14 @@ interface Stats {
   };
 }
 
-const eventTypeColors = {
+const eventTypeColors: Record<string, string> = {
   wildfire: '#ff4444',
   flood: '#4444ff',
   deforestation: '#44ff44',
   drought: '#ffaa00'
 };
 
-const severityColors = {
+const severityColors: Record<string, string> = {
   critical: '#ff0000',
   high: '#ff6600',
   medium: '#ffaa00',
@@ -180,19 +180,19 @@ export default function Dashboard() {
                     {type === 'drought' && '☀️'}
                     {' '}{type}
                   </span>
-                  <span style={{ fontWeight: 'bold' }}>{count}</span>
+                  <span style={{ fontWeight: 'bold' }}>{String(count)}</span>
                 </div>
               ))}
             </div>
           )}
 
-          <h2 style={{ fontSize: '20px', marginTop: '30px', marginBottom: '15px' }}>🌍 Recent Events</h2>
+          <h2 style={{ fontSize: '20px', marginTop: '30px', marginBottom: '15px' }}> Recent Events</h2>
           
           {loading ? (
             <div style={{ textAlign: 'center', padding: '40px' }}>Loading...</div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {events.map((event) => (
+              {events.map((event: Event) => (
                 <motion.div
                   key={event.id}
                   whileHover={{ scale: 1.02 }}
@@ -209,7 +209,7 @@ export default function Dashboard() {
                     background: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: '8px',
                     cursor: 'pointer',
-                    border: `2px solid ${eventTypeColors[event.event_type as keyof typeof eventTypeColors]}`,
+                    border: `2px solid ${eventTypeColors[event.event_type] || '#fff'}`,
                     transition: 'all 0.3s'
                   }}
                 >
@@ -223,7 +223,7 @@ export default function Dashboard() {
                       borderRadius: '12px',
                       fontSize: '10px',
                       fontWeight: 'bold',
-                      background: severityColors[event.severity as keyof typeof severityColors],
+                      background: severityColors[event.severity] || '#fff',
                       color: '#000'
                     }}>
                       {event.severity.toUpperCase()}
@@ -253,7 +253,7 @@ export default function Dashboard() {
           )}
         </motion.div>
 
-        {/* Map */}
+                   {/* Map */}
         <div style={{ flex: 1, position: 'relative' }}>
           <Map
             {...viewState}
@@ -262,31 +262,32 @@ export default function Dashboard() {
             style={{ width: '100%', height: '100%' }}
             mapStyle="mapbox://styles/mapbox/dark-v11"
           >
-            {events.map((event) => (
+            {events.map((event: Event) => (
               <Marker
                 key={event.id}
                 longitude={event.location.longitude}
                 latitude={event.location.latitude}
-                anchor="bottom"
-                onClick={(e) => {
-                  e.originalEvent.stopPropagation();
-                  setSelectedEvent(event);
-                }}
               >
-                <div style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  background: eventTypeColors[event.event_type as keyof typeof eventTypeColors],
-                  border: '3px solid white',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '20px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                  animation: event.is_verified ? 'none' : 'pulse 2s infinite'
-                }}>
+                <div 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedEvent(event);
+                  }}
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    background: eventTypeColors[event.event_type] || '#fff',
+                    border: '3px solid white',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '20px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                    animation: event.is_verified ? 'none' : 'pulse 2s infinite'
+                  }}
+                >
                   {event.event_type === 'wildfire' && '🔥'}
                   {event.event_type === 'flood' && '💧'}
                   {event.event_type === 'deforestation' && '🌳'}
@@ -300,7 +301,6 @@ export default function Dashboard() {
                 <Popup
                   longitude={selectedEvent.location.longitude}
                   latitude={selectedEvent.location.latitude}
-                  anchor="top"
                   onClose={() => setSelectedEvent(null)}
                   closeOnClick={false}
                 >
@@ -321,7 +321,7 @@ export default function Dashboard() {
                         padding: '4px 10px',
                         borderRadius: '12px',
                         fontSize: '11px',
-                        background: eventTypeColors[selectedEvent.event_type as keyof typeof eventTypeColors],
+                        background: eventTypeColors[selectedEvent.event_type] || '#fff',
                         color: 'white'
                       }}>
                         {selectedEvent.event_type}
@@ -330,7 +330,7 @@ export default function Dashboard() {
                         padding: '4px 10px',
                         borderRadius: '12px',
                         fontSize: '11px',
-                        background: severityColors[selectedEvent.severity as keyof typeof severityColors],
+                        background: severityColors[selectedEvent.severity] || '#fff',
                         color: '#000'
                       }}>
                         {selectedEvent.severity}

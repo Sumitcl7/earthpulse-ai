@@ -1,347 +1,393 @@
-import { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
+import { useEffect, useState } from 'react';
+import Map, { Marker, Popup } from 'react-map-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/Navbar';
-import { motion } from 'framer-motion';
+import { API_URL } from '../config';
 
-mapboxgl.accessToken = 'pk.eyJ1Ijoic3VtZGV2czEiLCJhIjoiY21oNTV5dHg4MDNsMDJycjBhY3NjcWVlciJ9.zj7lBK4wXxHLD8ChLJxztA';
+const MAPBOX_TOKEN = 'pk.eyJ1Ijoic3VtaXRjbDciLCJhIjoiY200a2pvbXJ0MGF4bjJxcHlrM2g0cnVpOSJ9.8mjUxVmZJTF_KyTvq5xKyw';
 
-const EVENT_COLORS: any = {
-  wildfire: '#ef4444',
-  flood: '#3b82f6',
-  deforestation: '#22c55e',
-  drought: '#f59e0b',
+interface Event {
+  id: number;
+  title: string;
+  description: string;
+  event_type: string;
+  severity: string;
+  location: {
+    name: string;
+    latitude: number;
+    longitude: number;
+  };
+  is_verified: boolean;
+  verification_score: number | null;
+  created_at: string;
+}
+
+interface Stats {
+  total_events: number;
+  verified_events: number;
+  unverified_events: number;
+  events_by_type: {
+    wildfire: number;
+    flood: number;
+    deforestation: number;
+    drought: number;
+  };
+  events_by_severity: {
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
+  };
+}
+
+const eventTypeColors = {
+  wildfire: '#ff4444',
+  flood: '#4444ff',
+  deforestation: '#44ff44',
+  drought: '#ffaa00'
+};
+
+const severityColors = {
+  critical: '#ff0000',
+  high: '#ff6600',
+  medium: '#ffaa00',
+  low: '#ffff00'
 };
 
 export default function Dashboard() {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
-  
-  const [events, setEvents] = useState<any[]>([]);
-  const [stats, setStats] = useState<any>(null);
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [verifying, setVerifying] = useState<number | null>(null);
 
-  // Fetch events
+  const [viewState, setViewState] = useState({
+    longitude: 0,
+    latitude: 20,
+    zoom: 2
+  });
+
   useEffect(() => {
-    console.log(' Fetching events from API...');
-    
-    fetch('http://127.0.0.1:8000/api/events')
-      .then(res => {
-        console.log('📡 Response status:', res.status);
-        return res.json();
-      })
-      .then(data => {
-        console.log(' Events loaded:', data);
-        console.log(' Number of events:', data.length);
-        setEvents(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error(' Error loading events:', err);
-        setLoading(false);
-      });
-    
-    fetch('http://127.0.0.1:8000/api/stats')
-      .then(res => res.json())
-      .then(data => {
-        console.log(' Stats loaded:', data);
-        setStats(data);
-      })
-      .catch(err => console.error('Error loading stats:', err));
+    fetchEvents();
+    fetchStats();
   }, []);
 
-  // Verify event function
+  const fetchEvents = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/events`);
+      const data = await response.json();
+      setEvents(data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      setLoading(false);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/stats`);
+      const data = await response.json();
+      setStats(data);
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
+
   const verifyEvent = async (eventId: number) => {
     setVerifying(eventId);
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/events/${eventId}/verify`, {
+      const response = await fetch(`${API_URL}/api/events/${eventId}/verify`, {
         method: 'POST',
       });
-      const result = await response.json();
-      console.log('Verification started:', result);
+      const data = await response.json();
+      console.log('Verification result:', data);
       
       setTimeout(() => {
-        fetch('http://127.0.0.1:8000/api/events')
-          .then(res => res.json())
-          .then(data => {
-            setEvents(data);
-            const updatedEvent = data.find((e: any) => e.id === eventId);
-            if (updatedEvent) {
-              setSelectedEvent(updatedEvent);
-            }
-            setVerifying(null);
-          });
-      }, 8000);
-    } catch (err) {
-      console.error('Error verifying event:', err);
+        fetchEvents();
+        setVerifying(null);
+      }, 10000);
+    } catch (error) {
+      console.error('Error verifying event:', error);
       setVerifying(null);
     }
   };
 
-  // Initialize map
-  useEffect(() => {
-    if (!mapContainer.current || map.current) return;
-
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/satellite-streets-v12',
-      center: [0, 20],
-      zoom: 2,
-    });
-
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-  }, []);
-
-  // Add markers
-  useEffect(() => {
-    if (!map.current || loading || events.length === 0) return;
-
-    markersRef.current.forEach(m => m.remove());
-    markersRef.current = [];
-
-    events.forEach((event) => {
-      const el = document.createElement('div');
-      el.style.width = '24px';
-      el.style.height = '24px';
-      el.style.borderRadius = '50%';
-      el.style.backgroundColor = EVENT_COLORS[event.event_type] || '#999';
-      el.style.border = '3px solid white';
-      el.style.cursor = 'pointer';
-      el.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
-      el.style.transition = 'transform 0.2s';
-      
-      if (event.is_verified) {
-        el.style.border = '3px solid #22c55e';
-        el.style.boxShadow = '0 0 20px rgba(34, 197, 94, 0.6)';
-      }
-      
-      el.addEventListener('mouseenter', () => {
-        el.style.transform = 'scale(1.3)';
-      });
-      el.addEventListener('mouseleave', () => {
-        el.style.transform = 'scale(1)';
-      });
-
-      const marker = new mapboxgl.Marker(el)
-        .setLngLat([event.location.longitude, event.location.latitude])
-        .addTo(map.current!);
-
-      el.addEventListener('click', () => {
-        setSelectedEvent(event);
-        map.current?.flyTo({
-          center: [event.location.longitude, event.location.latitude],
-          zoom: 8,
-          duration: 2000,
-        });
-      });
-
-      markersRef.current.push(marker);
-    });
-
-    console.log(` Added ${markersRef.current.length} markers to map`);
-  }, [events, loading]);
-
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ height: '100vh', background: '#0a0a0f', color: 'white', overflow: 'hidden' }}>
       <Navbar />
-
-      <div style={{ flex: 1, display: 'flex', marginTop: '60px' }}>
-        <div ref={mapContainer} style={{ flex: 1 }} />
-
+      
+      <div style={{ display: 'flex', height: 'calc(100vh - 70px)', marginTop: '70px' }}>
+        {/* Sidebar */}
         <motion.div
-          initial={{ x: 100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
+          initial={{ x: -300 }}
+          animate={{ x: 0 }}
           style={{
-            width: '400px',
-            background: 'rgba(10, 10, 15, 0.95)',
-            backdropFilter: 'blur(20px)',
-            borderLeft: '1px solid rgba(255,255,255,0.1)',
-            padding: '30px',
+            width: '350px',
+            background: 'rgba(20, 20, 30, 0.95)',
+            backdropFilter: 'blur(10px)',
+            borderRight: '1px solid rgba(255, 255, 255, 0.1)',
             overflowY: 'auto',
+            padding: '20px'
           }}
         >
+          <h2 style={{ fontSize: '24px', marginBottom: '20px' }}> Statistics</h2>
+          
+          {stats && (
+            <div style={{ marginBottom: '30px' }}>
+              <div style={{
+                padding: '20px',
+                background: 'rgba(102, 126, 234, 0.1)',
+                borderRadius: '12px',
+                marginBottom: '15px'
+              }}>
+                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#667eea' }}>
+                  {stats.total_events}
+                </div>
+                <div style={{ opacity: 0.7 }}>Total Events</div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '20px' }}>
+                <div style={{ padding: '15px', background: 'rgba(76, 175, 80, 0.1)', borderRadius: '8px' }}>
+                  <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#4CAF50' }}>
+                    {stats.verified_events}
+                  </div>
+                  <div style={{ fontSize: '12px', opacity: 0.7 }}>Verified</div>
+                </div>
+                <div style={{ padding: '15px', background: 'rgba(255, 152, 0, 0.1)', borderRadius: '8px' }}>
+                  <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#FF9800' }}>
+                    {stats.unverified_events}
+                  </div>
+                  <div style={{ fontSize: '12px', opacity: 0.7 }}>Unverified</div>
+                </div>
+              </div>
+
+              <h3 style={{ fontSize: '16px', marginBottom: '10px', marginTop: '20px' }}>By Type</h3>
+              {Object.entries(stats.events_by_type).map(([type, count]) => (
+                <div key={type} style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '8px 12px',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  borderRadius: '6px',
+                  marginBottom: '6px'
+                }}>
+                  <span style={{ textTransform: 'capitalize' }}>
+                    {type === 'wildfire' && '🔥'}
+                    {type === 'flood' && '💧'}
+                    {type === 'deforestation' && '🌳'}
+                    {type === 'drought' && '☀️'}
+                    {' '}{type}
+                  </span>
+                  <span style={{ fontWeight: 'bold' }}>{count}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <h2 style={{ fontSize: '20px', marginTop: '30px', marginBottom: '15px' }}>🌍 Recent Events</h2>
+          
           {loading ? (
-            <div>Loading...</div>
+            <div style={{ textAlign: 'center', padding: '40px' }}>Loading...</div>
           ) : (
-            <>
-              <h2 style={{ fontSize: '24px', marginBottom: '20px', fontWeight: 600 }}>
-                {selectedEvent ? selectedEvent.title : 'Global Events'}
-              </h2>
-
-              {!selectedEvent && stats && (
-                <>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
-                    <div style={{ padding: '16px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
-                      <div style={{ fontSize: '13px', opacity: 0.6 }}>TOTAL</div>
-                      <div style={{ fontSize: '28px', fontWeight: 700 }}>{stats.total_events}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {events.map((event) => (
+                <motion.div
+                  key={event.id}
+                  whileHover={{ scale: 1.02 }}
+                  onClick={() => {
+                    setSelectedEvent(event);
+                    setViewState({
+                      longitude: event.location.longitude,
+                      latitude: event.location.latitude,
+                      zoom: 8
+                    });
+                  }}
+                  style={{
+                    padding: '15px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    border: `2px solid ${eventTypeColors[event.event_type as keyof typeof eventTypeColors]}`,
+                    transition: 'all 0.3s'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>{event.title}</div>
+                      <div style={{ fontSize: '12px', opacity: 0.7 }}>{event.location.name}</div>
                     </div>
-                    <div style={{ padding: '16px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
-                      <div style={{ fontSize: '13px', opacity: 0.6 }}>VERIFIED</div>
-                      <div style={{ fontSize: '28px', fontWeight: 700, color: '#22c55e' }}>{stats.verified_events}</div>
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '24px' }}>
-                    <div style={{ padding: '10px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '6px', borderLeft: '3px solid #ef4444' }}>
-                      <div style={{ fontSize: '12px', opacity: 0.7 }}>🔥 Wildfires</div>
-                      <div style={{ fontSize: '20px', fontWeight: 600 }}>{stats.events_by_type.wildfire}</div>
-                    </div>
-                    <div style={{ padding: '10px', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '6px', borderLeft: '3px solid #3b82f6' }}>
-                      <div style={{ fontSize: '12px', opacity: 0.7 }}>💧 Floods</div>
-                      <div style={{ fontSize: '20px', fontWeight: 600 }}>{stats.events_by_type.flood}</div>
-                    </div>
-                    <div style={{ padding: '10px', background: 'rgba(34, 197, 94, 0.1)', borderRadius: '6px', borderLeft: '3px solid #22c55e' }}>
-                      <div style={{ fontSize: '12px', opacity: 0.7 }}>🌳 Deforest</div>
-                      <div style={{ fontSize: '20px', fontWeight: 600 }}>{stats.events_by_type.deforestation}</div>
-                    </div>
-                    <div style={{ padding: '10px', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '6px', borderLeft: '3px solid #f59e0b' }}>
-                      <div style={{ fontSize: '12px', opacity: 0.7 }}>☀️ Droughts</div>
-                      <div style={{ fontSize: '20px', fontWeight: 600 }}>{stats.events_by_type.drought}</div>
-                    </div>
-                  </div>
-
-                  <h3 style={{ fontSize: '16px', marginBottom: '16px' }}>Recent Events</h3>
-                  {events.slice(0, 5).map((event) => (
-                    <div
-                      key={event.id}
-                      onClick={() => setSelectedEvent(event)}
-                      style={{
-                        padding: '14px',
-                        background: 'rgba(255,255,255,0.03)',
-                        borderRadius: '8px',
-                        marginBottom: '12px',
-                        borderLeft: `3px solid ${EVENT_COLORS[event.event_type]}`,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                        <div style={{ fontSize: '14px', fontWeight: 500 }}>{event.title}</div>
-                        {event.is_verified && <span style={{ fontSize: '16px' }}>✅</span>}
-                      </div>
-                      <div style={{ fontSize: '12px', opacity: 0.5 }}>
-                        {event.location.name} • {new Date(event.created_at).toLocaleDateString()}
-                      </div>
-                    </div>
-                  ))}
-                </>
-              )}
-
-              {selectedEvent && (
-                <div>
-                  <p style={{ fontSize: '14px', opacity: 0.7, marginBottom: '16px' }}>{selectedEvent.description}</p>
-
-                  <div style={{ padding: '16px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', marginBottom: '12px' }}>
-                    <div style={{ fontSize: '13px', opacity: 0.6 }}>TYPE</div>
-                    <div style={{ fontSize: '16px', textTransform: 'capitalize', marginTop: '4px' }}>{selectedEvent.event_type}</div>
-                  </div>
-
-                  <div style={{ padding: '16px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', marginBottom: '12px' }}>
-                    <div style={{ fontSize: '13px', opacity: 0.6 }}>SEVERITY</div>
-                    <div style={{ 
-                      fontSize: '16px', 
-                      textTransform: 'uppercase',
-                      marginTop: '4px',
-                      color: selectedEvent.severity === 'critical' ? '#ef4444' : selectedEvent.severity === 'high' ? '#f59e0b' : '#22c55e'
+                    <div style={{
+                      padding: '4px 10px',
+                      borderRadius: '12px',
+                      fontSize: '10px',
+                      fontWeight: 'bold',
+                      background: severityColors[event.severity as keyof typeof severityColors],
+                      color: '#000'
                     }}>
-                      {selectedEvent.severity}
+                      {event.severity.toUpperCase()}
                     </div>
                   </div>
-
-                  <div style={{ padding: '16px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', marginBottom: '12px' }}>
-                    <div style={{ fontSize: '13px', opacity: 0.6 }}>LOCATION</div>
-                    <div style={{ fontSize: '14px', marginTop: '4px' }}>
-                      {selectedEvent.location.name}<br/>
-                      <span style={{ opacity: 0.5, fontSize: '12px' }}>
-                        {selectedEvent.location.latitude.toFixed(4)}, {selectedEvent.location.longitude.toFixed(4)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div style={{ 
-                    padding: '16px', 
-                    background: selectedEvent.is_verified ? 'rgba(34, 197, 94, 0.1)' : 'rgba(245, 158, 11, 0.1)', 
-                    borderRadius: '8px', 
-                    marginBottom: '16px',
-                    borderLeft: `3px solid ${selectedEvent.is_verified ? '#22c55e' : '#f59e0b'}`
-                  }}>
-                    <div style={{ fontSize: '13px', opacity: 0.6 }}>VERIFICATION</div>
-                    <div style={{ fontSize: '16px', marginTop: '4px' }}>
-                      {selectedEvent.is_verified ? (
-                        <>
-                           Verified
-                          {selectedEvent.verification_score && (
-                            <span style={{ marginLeft: '8px', opacity: 0.7, fontSize: '14px' }}>
-                              ({(selectedEvent.verification_score * 100).toFixed(0)}% confidence)
-                            </span>
-                          )}
-                        </>
-                      ) : (
-                        ' Not Verified'
+                  
+                  {event.is_verified && (
+                    <div style={{
+                      marginTop: '8px',
+                      fontSize: '11px',
+                      color: '#4CAF50',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px'
+                    }}>
+                      ✓ Verified
+                      {event.verification_score && (
+                        <span style={{ opacity: 0.7 }}>
+                          ({Math.round(event.verification_score * 100)}%)
+                        </span>
                       )}
                     </div>
-                  </div>
-
-                  {!selectedEvent.is_verified && (
-                    <button
-                      onClick={() => verifyEvent(selectedEvent.id)}
-                      disabled={verifying === selectedEvent.id}
-                      style={{
-                        width: '100%',
-                        padding: '14px',
-                        background: verifying === selectedEvent.id 
-                          ? 'rgba(100,100,100,0.3)' 
-                          : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        border: 'none',
-                        borderRadius: '8px',
-                        color: 'white',
-                        cursor: verifying === selectedEvent.id ? 'wait' : 'pointer',
-                        fontSize: '15px',
-                        fontWeight: 600,
-                        marginBottom: '12px',
-                        transition: 'all 0.2s',
-                      }}
-                    >
-                      {verifying === selectedEvent.id ? ' Analyzing Satellite Data...' : ' Verify with Satellite Data'}
-                    </button>
                   )}
-
-                  <button
-                    onClick={() => setSelectedEvent(null)}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      background: 'rgba(255,255,255,0.1)',
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      borderRadius: '8px',
-                      color: 'white',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      fontWeight: 500,
-                      transition: 'all 0.2s',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(255,255,255,0.15)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
-                    }}
-                  >
-                    ← Back to List
-                  </button>
-                </div>
-              )}
-            </>
+                </motion.div>
+              ))}
+            </div>
           )}
         </motion.div>
+
+        {/* Map */}
+        <div style={{ flex: 1, position: 'relative' }}>
+          <Map
+            {...viewState}
+            onMove={(evt) => setViewState(evt.viewState)}
+            mapboxAccessToken={MAPBOX_TOKEN}
+            style={{ width: '100%', height: '100%' }}
+            mapStyle="mapbox://styles/mapbox/dark-v11"
+          >
+            {events.map((event) => (
+              <Marker
+                key={event.id}
+                longitude={event.location.longitude}
+                latitude={event.location.latitude}
+                anchor="bottom"
+                onClick={(e) => {
+                  e.originalEvent.stopPropagation();
+                  setSelectedEvent(event);
+                }}
+              >
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  background: eventTypeColors[event.event_type as keyof typeof eventTypeColors],
+                  border: '3px solid white',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '20px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                  animation: event.is_verified ? 'none' : 'pulse 2s infinite'
+                }}>
+                  {event.event_type === 'wildfire' && '🔥'}
+                  {event.event_type === 'flood' && '💧'}
+                  {event.event_type === 'deforestation' && '🌳'}
+                  {event.event_type === 'drought' && '☀️'}
+                </div>
+              </Marker>
+            ))}
+
+            <AnimatePresence>
+              {selectedEvent && (
+                <Popup
+                  longitude={selectedEvent.location.longitude}
+                  latitude={selectedEvent.location.latitude}
+                  anchor="top"
+                  onClose={() => setSelectedEvent(null)}
+                  closeOnClick={false}
+                >
+                  <div style={{
+                    padding: '15px',
+                    minWidth: '280px',
+                    background: '#1a1a2e',
+                    color: 'white',
+                    borderRadius: '8px'
+                  }}>
+                    <h3 style={{ margin: '0 0 10px 0', fontSize: '16px' }}>{selectedEvent.title}</h3>
+                    <p style={{ margin: '0 0 10px 0', fontSize: '13px', opacity: 0.8 }}>
+                      {selectedEvent.description}
+                    </p>
+                    
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '10px', flexWrap: 'wrap' }}>
+                      <span style={{
+                        padding: '4px 10px',
+                        borderRadius: '12px',
+                        fontSize: '11px',
+                        background: eventTypeColors[selectedEvent.event_type as keyof typeof eventTypeColors],
+                        color: 'white'
+                      }}>
+                        {selectedEvent.event_type}
+                      </span>
+                      <span style={{
+                        padding: '4px 10px',
+                        borderRadius: '12px',
+                        fontSize: '11px',
+                        background: severityColors[selectedEvent.severity as keyof typeof severityColors],
+                        color: '#000'
+                      }}>
+                        {selectedEvent.severity}
+                      </span>
+                    </div>
+
+                    <div style={{ fontSize: '12px', opacity: 0.7, marginBottom: '10px' }}>
+                       {selectedEvent.location.name}
+                    </div>
+
+                    {selectedEvent.is_verified ? (
+                      <div style={{
+                        padding: '8px',
+                        background: 'rgba(76, 175, 80, 0.2)',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        color: '#4CAF50'
+                      }}>
+                        ✓ Verified by Satellite
+                        {selectedEvent.verification_score && (
+                          <div style={{ marginTop: '4px' }}>
+                            Confidence: {Math.round(selectedEvent.verification_score * 100)}%
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => verifyEvent(selectedEvent.id)}
+                        disabled={verifying === selectedEvent.id}
+                        style={{
+                          width: '100%',
+                          padding: '10px',
+                          background: verifying === selectedEvent.id ? '#555' : '#667eea',
+                          border: 'none',
+                          borderRadius: '6px',
+                          color: 'white',
+                          cursor: verifying === selectedEvent.id ? 'not-allowed' : 'pointer',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        {verifying === selectedEvent.id ? ' Analyzing...' : ' Verify with Satellite Data'}
+                      </button>
+                    )}
+                  </div>
+                </Popup>
+              )}
+            </AnimatePresence>
+          </Map>
+
+          <style>{`
+            @keyframes pulse {
+              0%, 100% { transform: scale(1); opacity: 1; }
+              50% { transform: scale(1.1); opacity: 0.8; }
+            }
+          `}</style>
+        </div>
       </div>
     </div>
   );

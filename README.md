@@ -1,4 +1,4 @@
-﻿# 🌍 EarthPulse AI
+﻿#  EarthPulse AI
 
 **Environmental Event Monitoring System with Real-Time Satellite Analysis**
 
@@ -6,20 +6,20 @@ Monitor wildfires, floods, deforestation, and droughts worldwide using AI-powere
 
 ---
 
-## 🚀 Features
+##  Features
 
-- 🗺️ **Interactive Global Map** - Real-time visualization of environmental events
-- 🛰️ **Satellite Verification** - Verify events using Google Earth Engine data
+-  **Interactive Global Map** - Real-time visualization of environmental events
+-  **Satellite Verification** - Verify events using Google Earth Engine data
   - NDVI analysis for vegetation health
   - Thermal detection for wildfires
   - Water body detection for floods
-- 📰 **News Scraping** - Import environmental news automatically
-- 📊 **Statistics Dashboard** - Track events by type and severity
-- ✅ **Event Verification** - AI-powered confidence scoring
+-  **News Scraping** - Import environmental news automatically
+-  **Statistics Dashboard** - Track events by type and severity
+-  **Event Verification** - AI-powered confidence scoring
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 ### Backend
 - **FastAPI** - High-performance Python web framework
@@ -36,7 +36,7 @@ Monitor wildfires, floods, deforestation, and droughts worldwide using AI-powere
 
 ---
 
-## 📦 Installation
+##  Installation
 
 ### Prerequisites
 - Python 3.8+
@@ -81,7 +81,7 @@ Frontend runs on: http://localhost:5173
 
 ---
 
-## 🌐 API Endpoints
+##  API Endpoints
 
 ### Events
 - \GET /api/events\ - Get all events
@@ -110,26 +110,28 @@ Frontend runs on: http://localhost:5173
 
 ---
 
-## 🤝 Contributing
+##  Contributing
 
 Contributions welcome! Please open an issue or submit a pull request.
 
 ---
 
-## 📄 License
+##  License
 
 MIT License - feel free to use this project for learning or commercial purposes.
 
 ---
 
-## 👨‍💻 Author
+##  Author
 
-Built with ❤️ by **@Sumitcl7**
+ **@Sumitcl7**
 
 ---
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - Google Earth Engine for satellite data
 - Mapbox for mapping infrastructure
 - OpenStreetMap contributors
+
+

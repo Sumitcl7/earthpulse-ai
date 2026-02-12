@@ -104,9 +104,24 @@ Frontend runs on: http://localhost:5173
 
 ---
 
-## 📸 Screenshots
+##  Screenshots
+**Landing**
+<img width="1919" height="1078" alt="image" src="https://github.com/user-attachments/assets/157fb05d-1e37-4b1a-8c5a-94ad69aeba7c" />
 
-[Add screenshots here]
+**Dashboard**
+<img width="1919" height="1079" alt="Screenshot 2026-02-12 221138" src="https://github.com/user-attachments/assets/30212288-f251-4d86-88c2-7310a91582bd" />
+
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/1f1ab3c6-c36b-4b4e-8c16-0f2d0241b47a" />
+
+**News**
+<img width="1919" height="1077" alt="image" src="https://github.com/user-attachments/assets/5605ca3d-e043-4b28-82f6-16089ef156f6" />
+
+**FAQ**
+<img width="1919" height="933" alt="image" src="https://github.com/user-attachments/assets/2f83bf70-eb02-4436-aed7-38d2a52155ea" />
+
+
+
+
 
 ---
 
@@ -135,7 +150,7 @@ MIT License - feel free to use this project for learning or commercial purposes.
 - OpenStreetMap contributors
 
 ## Important 
-Currently the GEE pipline is getting issues due to Payment issues and some technical backend glitches.
-I am still fixing things and working on that,The full project working will be Live for next month till then you are free to contribute and help
+Currently the GEE pipline is getting issues due to Payment issues and some technical backend glitches.So, the backend is currently running on 160 sample data.
+I am still fixing things and working on that,But good news is News SCraper pipeline is working perfectly.The full project working will be Live for next month till then you are free to contribute and help
 
 

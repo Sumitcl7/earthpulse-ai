@@ -134,4 +134,8 @@ MIT License - feel free to use this project for learning or commercial purposes.
 - Mapbox for mapping infrastructure
 - OpenStreetMap contributors
 
+## Important 
+Currently the GEE pipline is getting issues due to Payment issues and some technical backend glitches.
+I am still fixing things and working on that,The full project working will be Live for next month till then you are free to contribute and help
+
 
